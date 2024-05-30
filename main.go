@@ -9,15 +9,15 @@ import (
 
 func main() {
 
-	const dirName = "video-server";
+	const dirName = ".";
 	const port = ":5555";
 
 
-	http.Handle("/stream",addHeaders(http.FileServer(http.Dir(dirName))));
+	http.Handle("/",addHeaders(http.FileServer(http.Dir(dirName))));
 	fmt.Printf("Serving on localhost%v\n",port);
 
 	err := (http.ListenAndServe(port,nil)); if err != nil {
-		log.Fatalln(err);
+		log.Fatal(err);
 	}
 }
 
