@@ -5,27 +5,34 @@ import (
 	"fmt"
 	"net/http"
 	"log"
+
+	"github.com/gorilla/mux"
 )
 
-func main() {
+func serveVideo(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello there Friend\n\n");
 
-	const dirName = ".";
-	const port = ":5555";
-
-
-	http.Handle("/",addHeaders(http.FileServer(http.Dir(dirName))));
-	fmt.Printf("Serving on localhost%v\n",port);
-
-	err := (http.ListenAndServe(port,nil)); if err != nil {
-		log.Fatal(err);
+	cookie := &http.Cookie{
+		Name:"Example.com",
+		Value:"1234",
+		Domain:"happygolucky.com",
 	}
+	http.SetCookie(w, cookie);
+
+	fmt.Fprintf(w, fmt.Sprintf("Name:%s,\nDomain:%s\n", cookie.Name, cookie.Domain));
+
+	ctx := r.Context();
+	fmt.Fprintf(w, ctx);
+
 }
 
-// addHeaders is a custom func, to bypass CORS
-func addHeaders(h http.Handler) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin","*");
-		h.ServeHTTP(w, r);
+func main() {
+	r := mux.NewRouter();
+	r.Handle("/", http.FileServer(http.Dir(".")));
+	r.HandleFunc("/hello", serveVideo);
+
+	err := http.ListenAndServe(":5555",r); if err != nil {
+		log.Fatal(err);
 	}
 }
 
