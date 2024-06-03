@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"io"
 	"log"
 	"github.com/gorilla/mux"
 )
@@ -16,12 +17,21 @@ func serveVideo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Video not found",http.StatusNotFound);
 		return
 	}
-
+	defer video.Close();
 	// headers,
 	w.Header().Set("Content-Type","video/mp4");
-	//w.Header().Set("Content-Disposition","attachment; filename=Secret.mp4");
+	w.Header().Set("Content-Disposition","attachment; filename=Secret.mp4");
 
-	http.ServeFile(w, r, video);
+	var buf = make([]byte, 32);
+	for i:=0; ;i++ {
+		n, err := video.Read(buf); if err == nil {
+			fmt.Printf("%s",string(buf[:n])+ "\n");
+		}
+	}
+	if err != nil || err != io.EOF {
+		fmt.Println("\n\nerror reading from file\n");
+		return
+	}
 }
 
 func main() {
