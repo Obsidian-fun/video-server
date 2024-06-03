@@ -17,17 +17,11 @@ func serveVideo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stat,err := video.Stat();
-	if err != nil {
-		fmt.Println("Cannot retrive file info: ",err);
-	}
-
 	// headers,
 	w.Header().Set("Content-Type","video/mp4");
 	//w.Header().Set("Content-Disposition","attachment; filename=Secret.mp4");
 
-	defer video.Close();
-	http.ServeContent(w, r, "Secret.mp4", stat.ModTime(), video);
+	http.ServeFile(w, r, video);
 }
 
 func main() {
