@@ -7,6 +7,7 @@ import (
 	"os"
 	"io"
 	"log"
+
 	"github.com/gorilla/mux"
 )
 
@@ -20,24 +21,13 @@ func serveVideo(w http.ResponseWriter, r *http.Request) {
 	defer video.Close();
 	// headers,
 	w.Header().Set("Content-Type","video/mp4");
-	w.Header().Set("Content-Disposition","attachment; filename=Secret.mp4");
 
-	var buf = make([]byte, 32);
-	for i:=0; ;i++ {
-		n, err := video.Read(buf); if err == nil {
-			fmt.Printf("%s",string(buf[:n])+ "\n");
-		}
-	}
-	if err != nil || err != io.EOF {
-		fmt.Println("\n\nerror reading from file\n");
-		return
-	}
+	io.Copy(w, video);
 }
 
 func main() {
 	r := mux.NewRouter();
-	r.Handle("/", http.FileServer(http.Dir(".")));
-	r.HandleFunc("/hello", serveVideo);
+	r.HandleFunc("/", serveVideo);
 
 	err := http.ListenAndServe(":5555",r); if err != nil {
 		log.Fatal(err);
